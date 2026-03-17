@@ -6,8 +6,9 @@ const generateToken = require("../services/generateToken");
 const registerUser = async (req, res) => {
   try {
     const { name, email, password } = req.body;
+    const normalizedEmail = email.trim().toLowerCase();
 
-    const existingUser = await User.findOne({ email });
+    const existingUser = await User.findOne({ email: normalizedEmail });
 
     if (existingUser) {
       return res.status(400).json({
@@ -70,7 +71,7 @@ const registerUser = async (req, res) => {
 
     const user = await User.create({
       name,
-      email,
+      email: normalizedEmail,
       password: hashedPassword,
 
       usageGraph: {
@@ -105,7 +106,9 @@ const loginUser = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    const user = await User.findOne({ email });
+const normalizedEmail = email.trim().toLowerCase();
+
+    const user = await User.findOne({ email: normalizedEmail });
 
     if (user && await bcrypt.compare(password, user.password)) {
       res.status(200).json({
