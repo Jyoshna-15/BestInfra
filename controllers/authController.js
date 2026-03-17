@@ -113,7 +113,8 @@ const normalizedEmail = email.trim().toLowerCase();
     if (user && await bcrypt.compare(password, user.password)) {
       res.status(200).json({
         token: generateToken(user._id),
-        consumerName: user.name
+        consumerName: user.name,
+        name: user.name
       });
     } else {
       res.status(401).json({
