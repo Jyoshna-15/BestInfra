@@ -62,6 +62,21 @@ const userSchema = new mongoose.Schema({
     default: 18
   },
 
+
+lastMonthUsage: {
+  type: Number,
+  default: 340
+},
+
+consumerName: {
+  type: String,
+  default: "GMR AERO TOWER 2 INCOMER"
+},
+
+signalStrength: {
+  type: Number,
+  default: 4
+},
   usageGraph: {
     sevenDays: [graphItemSchema],
     thirtyDays: [graphItemSchema],
