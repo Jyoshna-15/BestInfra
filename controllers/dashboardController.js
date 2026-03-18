@@ -2,7 +2,7 @@ const User = require("../models/User");
 
 const getDashboard = async (req, res) => {
   try {
-    const user  = await User.findById(req.user._id);
+    const userDoc  = await User.findById(req.user._id);
      const user = userDoc.toObject();
     const range = req.query.range || "7d";
     const date  = req.query.date; // "2026-03-15"
