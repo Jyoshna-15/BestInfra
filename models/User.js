@@ -26,6 +26,10 @@ const userSchema = new mongoose.Schema({
     type: String,
     default: "MTR123456"
   },
+  consumerId: {
+  type: String,
+  default: "GMR2024567890"
+},
 
   balance: {
     type: Number,

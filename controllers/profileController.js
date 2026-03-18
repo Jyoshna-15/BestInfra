@@ -8,7 +8,10 @@ const getProfile = async (req, res) => {
 
     res.status(200).json({
       name: user.name,
-      email: user.email
+      email: user.email,
+       meterNumber: user.meterNumber,
+  
+  consumerId:  user.consumerId
     });
 
   } catch (error) {
