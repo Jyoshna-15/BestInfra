@@ -82,13 +82,29 @@ const registerUser = async (req, res) => {
       }
     });
 
-    await Notification.create({
-      userId: user._id,
-      title: "Bill Due Reminder",
-      description: "Your electricity bill is due soon.",
-      type: "bill_due",
-      date: today.toISOString().split("T")[0]
-    });
+   await Notification.insertMany([
+  {
+    userId:      user._id,
+    title:       "Low Balance Alert",
+    description: "Your meter balance is below ₹100.\nRecharge now to avoid disconnection.",
+    type:        "alert",
+    date:        "Today"
+  },
+  {
+    userId:      user._id,
+    title:       "Upcoming Due Date",
+    description: "Your bill of ₹3,180 is due on 10 May.\nPay now to avoid late fees.",
+    type:        "due",
+    date:        "Today"
+  },
+  {
+    userId:      user._id,
+    title:       "Payment Successful",
+    description: "₹3,180 received.\nThank you for staying current.",
+    type:        "success",
+    date:        "Yesterday"
+  }
+]);
 
     res.status(201).json({
       message: "User registered successfully"
