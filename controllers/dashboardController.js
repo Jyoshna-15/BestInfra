@@ -3,6 +3,7 @@ const User = require("../models/User");
 const getDashboard = async (req, res) => {
   try {
     const user  = await User.findById(req.user._id);
+     const user = userDoc.toObject();
     const range = req.query.range || "7d";
     const date  = req.query.date; // "2026-03-15"
 
@@ -47,16 +48,18 @@ const getDashboard = async (req, res) => {
     }
 
     // ── Format labels for chart ──
-    usageGraph = usageGraph.map((item) => {
-      const d = new Date(item.label);
-      const isMonthView = range === "90d" || range === "1y";
-      return {
-        ...item,
-        label: isMonthView
-          ? d.toLocaleString("default", { month: "short" }) // "Jan", "Feb"
-          : String(d.getDate())                              // "1", "15"
-      };
-    });
+  // ── Format labels for chart ──
+usageGraph = usageGraph.map((item) => {
+  const plainItem = item.toObject ? item.toObject() : item; // ← convert Mongoose doc to plain object
+  const d = new Date(plainItem.label);
+  const isMonthView = range === "90d" || range === "1y";
+  return {
+    label: isMonthView
+      ? d.toLocaleString("default", { month: "short" })
+      : String(d.getDate()),
+    value: plainItem.value
+  };
+});
 
     // ── Days left ──
     const today    = new Date();
