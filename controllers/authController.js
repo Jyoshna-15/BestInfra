@@ -31,9 +31,9 @@ const registerUser = async (req, res) => {
       date.setDate(today.getDate() - i);
 
       sevenDays.push({
-        label: `${date.getDate()}`,
-        value: Math.floor(Math.random() * 10) + 5
-      });
+  label: date.toISOString().split("T")[0],  // "2026-03-15" instead of `${date.getDate()}`
+  value: Math.floor(Math.random() * 10) + 5
+});
     }
 
     // 30 Days → previous 30 dates
@@ -41,10 +41,10 @@ const registerUser = async (req, res) => {
       const date = new Date();
       date.setDate(today.getDate() - i);
 
-      thirtyDays.push({
-        label: `${date.getDate()}`,
-        value: Math.floor(Math.random() * 10) + 5
-      });
+     thirtyDays.push({
+  label: date.toISOString().split("T")[0],  // "2026-03-15" instead of `${date.getDate()}`
+  value: Math.floor(Math.random() * 10) + 5
+});
     }
 
     // 90 Days → previous 3 completed months
@@ -52,10 +52,10 @@ const registerUser = async (req, res) => {
       const date = new Date();
       date.setMonth(today.getMonth() - i);
 
-      ninetyDays.push({
-        label: date.toLocaleString("default", { month: "short" }),
-        value: Math.floor(Math.random() * 100) + 180
-      });
+     ninetyDays.push({
+  label: date.toISOString().split("T")[0],  // instead of date.toLocaleString("default", { month: "short" })
+  value: Math.floor(Math.random() * 100) + 180
+});
     }
 
     // 1 Year → previous 12 months
@@ -64,9 +64,9 @@ const registerUser = async (req, res) => {
       date.setMonth(today.getMonth() - i);
 
       oneYear.push({
-        label: date.toLocaleString("default", { month: "short" }),
-        value: Math.floor(Math.random() * 100) + 180
-      });
+  label: date.toISOString().split("T")[0],  // instead of date.toLocaleString("default", { month: "short" })
+  value: Math.floor(Math.random() * 100) + 180
+});
     }
 
     const user = await User.create({
