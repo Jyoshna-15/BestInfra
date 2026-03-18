@@ -3,46 +3,66 @@ const User = require("../models/User");
 const getDashboard = async (req, res) => {
   try {
     const user  = await User.findById(req.user._id);
-    const range = req.query.range;
-    const date  = req.query.date; // "2026-03-15" from frontend
+    const range = req.query.range || "7d";
+    const date  = req.query.date; // "2026-03-15"
 
-    let usageGraph = user.usageGraph.sevenDays;
+    let usageGraph = [];
 
-    if (range === "30d") usageGraph = user.usageGraph.thirtyDays;
-    if (range === "90d") usageGraph = user.usageGraph.ninetyDays;
-    if (range === "1y")  usageGraph = user.usageGraph.oneYear;
-
-    // ── If date picked, filter thirtyDays by that month ──
     if (date) {
-      const picked       = new Date(date);
-      const pickedMonth  = picked.getMonth();
-      const pickedYear   = picked.getFullYear();
+      // ── Date picked — show data BEFORE that date ──
+      const picked = new Date(date);
+      picked.setHours(23, 59, 59);
 
-      usageGraph = user.usageGraph.thirtyDays.filter((item) => {
-        const d = new Date(item.label);
-        return d.getMonth() === pickedMonth && d.getFullYear() === pickedYear;
-      });
+      if (range === "7d") {
+        // last 7 days before picked date from thirtyDays pool
+        usageGraph = user.usageGraph.thirtyDays
+          .filter((item) => new Date(item.label) <= picked)
+          .sort((a, b) => new Date(a.label) - new Date(b.label))
+          .slice(-7);
+      } else if (range === "30d") {
+        // last 30 days before picked date
+        usageGraph = user.usageGraph.thirtyDays
+          .filter((item) => new Date(item.label) <= picked)
+          .sort((a, b) => new Date(a.label) - new Date(b.label))
+          .slice(-30);
+      } else if (range === "90d") {
+        // last 3 months before picked date
+        usageGraph = user.usageGraph.ninetyDays
+          .filter((item) => new Date(item.label) <= picked)
+          .sort((a, b) => new Date(a.label) - new Date(b.label))
+          .slice(-3);
+      } else if (range === "1y") {
+        // last 12 months before picked date
+        usageGraph = user.usageGraph.oneYear
+          .filter((item) => new Date(item.label) <= picked)
+          .sort((a, b) => new Date(a.label) - new Date(b.label))
+          .slice(-12);
+      }
+    } else {
+      // ── No date — use stored data directly ──
+      if (range === "7d")  usageGraph = user.usageGraph.sevenDays;
+      if (range === "30d") usageGraph = user.usageGraph.thirtyDays;
+      if (range === "90d") usageGraph = user.usageGraph.ninetyDays;
+      if (range === "1y")  usageGraph = user.usageGraph.oneYear;
     }
 
-    // ── Format labels nicely for chart display ──
+    // ── Format labels for chart ──
     usageGraph = usageGraph.map((item) => {
       const d = new Date(item.label);
-      const isMonthRange = !date && (range === "90d" || range === "1y");
+      const isMonthView = range === "90d" || range === "1y";
       return {
         ...item,
-        label: isMonthRange
-          ? d.toLocaleString("default", { month: "short" }) // "Mar"
-          : String(d.getDate())                              // "15"
+        label: isMonthView
+          ? d.toLocaleString("default", { month: "short" }) // "Jan", "Feb"
+          : String(d.getDate())                              // "1", "15"
       };
     });
 
     // ── Days left ──
     const today    = new Date();
     const due      = new Date(user.dueDate);
-    const diffTime = due - today;
-    const daysLeft = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    const daysLeft = Math.ceil((due - today) / (1000 * 60 * 60 * 24));
 
-    // ── Usage stats ──
     const usagePercentage = (
       ((user.monthlyUsage - user.lastMonthUsage) / user.lastMonthUsage) * 100
     ).toFixed(1);
